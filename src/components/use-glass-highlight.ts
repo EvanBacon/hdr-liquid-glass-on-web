@@ -109,8 +109,11 @@ export const useGlassHighlight = ({
     const maxScaleDistance = 100; // Distance for max scale
     const scaleXAmount = Math.min(distanceOutsideX / maxScaleDistance, 1) * 0.1; // Max 10% scale per axis
     const scaleYAmount = Math.min(distanceOutsideY / maxScaleDistance, 1) * 0.1;
-    const scaleX = 1 + scaleXAmount;
-    const scaleY = 1 + scaleYAmount;
+
+    // Base scale for press-down effect (1.02 = 2% larger when pressed)
+    const baseScale = 1.02;
+    const scaleX = baseScale + scaleXAmount;
+    const scaleY = baseScale + scaleYAmount;
 
     // Set transform origin based on where the cursor is relative to the element
     let originX = "50%";
@@ -296,7 +299,17 @@ export const useGlassHighlight = ({
     data.dragStartY = e.y;
     const el = getEl();
     if (el) {
-      el.style.transitionDuration = "0ms";
+      el.style.transitionDuration = "150ms";
+      el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+      // Apply initial press-down scale
+      el.style.transform = "translate(0px, 0px) scale(1.02, 1.02)";
+
+      // Then remove transition for smooth dragging
+      setTimeout(() => {
+        if (data.isDragging && el) {
+          el.style.transitionDuration = "0ms";
+        }
+      }, 150);
     }
     // Change glow color and opacity when dragging
     if (data.backgroundEl && data.maskSize !== undefined) {
