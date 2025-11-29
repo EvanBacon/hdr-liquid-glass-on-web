@@ -48,10 +48,47 @@ export const useGlassHighlight = ({
   const setLightPosition = (e) => {
     if (data.lightEl && data.maskRadius) {
       const { x, y } = e;
-      const offsetX = x - data.rect.x - data.maskRadius;
-      const offsetY = y - data.rect.y - data.maskRadius;
-      data.lightEl.style.maskPosition = `${offsetX}px ${offsetY}px`;
-      data.lightEl.style.webkitMaskPosition = `${offsetX}px ${offsetY}px`;
+      const targetX = x - data.rect.x - data.maskRadius;
+      const targetY = y - data.rect.y - data.maskRadius;
+
+      // Initialize current position if not set
+      if (data.currentMaskX === undefined) {
+        data.currentMaskX = targetX;
+        data.currentMaskY = targetY;
+      }
+
+      // Store target for lerping
+      data.targetMaskX = targetX;
+      data.targetMaskY = targetY;
+
+      // Start lerp animation if not already running
+      if (!data.isLerping) {
+        data.isLerping = true;
+        const lerpAnimation = () => {
+          const lerpFactor = 0.09; // Smoothing factor (lower = smoother/slower)
+
+          data.currentMaskX +=
+            (data.targetMaskX - data.currentMaskX) * lerpFactor;
+          data.currentMaskY +=
+            (data.targetMaskY - data.currentMaskY) * lerpFactor;
+
+          data.lightEl.style.maskPosition = `${data.currentMaskX}px ${data.currentMaskY}px`;
+          data.lightEl.style.webkitMaskPosition = `${data.currentMaskX}px ${data.currentMaskY}px`;
+
+          // Continue lerping if not close enough to target
+          const distanceToTarget = Math.sqrt(
+            Math.pow(data.targetMaskX - data.currentMaskX, 2) +
+              Math.pow(data.targetMaskY - data.currentMaskY, 2)
+          );
+
+          if (distanceToTarget > 0.5) {
+            requestAnimationFrame(lerpAnimation);
+          } else {
+            data.isLerping = false;
+          }
+        };
+        requestAnimationFrame(lerpAnimation);
+      }
     }
   };
 
@@ -63,7 +100,7 @@ export const useGlassHighlight = ({
     d.rect = el.getBoundingClientRect();
     const lightElWrap = document.createElement("span");
     lightElWrap.className = "rounded-[inherit]";
-    lightElWrap.style = `left: ${offset}px; top: ${offset}px; right: ${offset}px; bottom: ${offset}px;transition-duration: 300ms; opacity: 0; position: absolute; overflow: hidden; pointer-events: none`;
+    lightElWrap.style = `left: ${offset}px; top: ${offset}px; right: ${offset}px; bottom: ${offset}px;transition-duration: 50ms; opacity: 0; position: absolute; overflow: hidden; pointer-events: none`;
 
     // Background layer with static color and animated mask
     const backgroundEl = document.createElement("span");
@@ -85,7 +122,6 @@ export const useGlassHighlight = ({
     backgroundEl.style.webkitMaskPosition = "0px 0px";
     backgroundEl.style.maskRepeat = "no-repeat";
     backgroundEl.style.webkitMaskRepeat = "no-repeat";
-    backgroundEl.style.transition = "mask-position 0.1s ease-out";
     backgroundEl.style.opacity = `${opacity}`;
 
     d.lightEl = backgroundEl;
@@ -102,7 +138,7 @@ export const useGlassHighlight = ({
           scale = 1.05;
         }
         el.style.scale = scale;
-        el.style.transitionDuration = "500ms";
+        el.style.transitionDuration = "50ms";
         el.style.transitionTimingFunction = "ease-in-out";
       }
     }
