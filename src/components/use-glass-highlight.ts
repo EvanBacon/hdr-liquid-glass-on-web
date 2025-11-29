@@ -67,6 +67,7 @@ export const useGlassHighlight = ({
     if (!el) return;
 
     const { x, y } = e;
+    const rect = data.rect;
 
     // Calculate delta from drag start position
     const deltaX = x - data.dragStartX;
@@ -84,12 +85,28 @@ export const useGlassHighlight = ({
       Math.min(maxStretch, deltaY * dampingFactor)
     );
 
-    // Calculate non-uniform scale based on directional movement
+    // Calculate how far outside bounds the pointer is
+    let distanceOutsideX = 0;
+    let distanceOutsideY = 0;
+
+    if (x < rect.left) {
+      distanceOutsideX = rect.left - x;
+    } else if (x > rect.right) {
+      distanceOutsideX = x - rect.right;
+    }
+
+    if (y < rect.top) {
+      distanceOutsideY = rect.top - y;
+    } else if (y > rect.bottom) {
+      distanceOutsideY = y - rect.bottom;
+    }
+
+    // Calculate scale based on distance outside bounds (smooth transition)
     const maxScaleDistance = 100; // Distance for max scale
     const scaleXAmount =
-      Math.min(Math.abs(deltaX) / maxScaleDistance, 1) * 0.05; // Max 10% scale per axis
+      Math.min(distanceOutsideX / maxScaleDistance, 1) * 0.1; // Max 10% scale per axis
     const scaleYAmount =
-      Math.min(Math.abs(deltaY) / maxScaleDistance, 1) * 0.05;
+      Math.min(distanceOutsideY / maxScaleDistance, 1) * 0.1;
     const scaleX = 1 + scaleXAmount;
     const scaleY = 1 + scaleYAmount;
 
