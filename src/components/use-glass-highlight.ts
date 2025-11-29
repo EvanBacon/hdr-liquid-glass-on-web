@@ -54,7 +54,13 @@ export const useGlassHighlight = ({
   };
 
   const updateStretch = (e) => {
-    if (!data.rect || !data.isDragging || data.dragStartX === undefined || data.dragStartY === undefined) return;
+    if (
+      !data.rect ||
+      !data.isDragging ||
+      data.dragStartX === undefined ||
+      data.dragStartY === undefined
+    )
+      return;
 
     const el = getEl();
 
@@ -67,8 +73,8 @@ export const useGlassHighlight = ({
     const deltaY = y - data.dragStartY;
 
     // Apply damping to create elastic feel (max 30px stretch)
-    const maxStretch = 30;
-    const dampingFactor = 0.3;
+    const maxStretch = 40;
+    const dampingFactor = 0.1;
     const stretchX = Math.max(
       -maxStretch,
       Math.min(maxStretch, deltaX * dampingFactor)
@@ -78,11 +84,20 @@ export const useGlassHighlight = ({
       Math.min(maxStretch, deltaY * dampingFactor)
     );
 
+    // Calculate non-uniform scale based on directional movement
+    const maxScaleDistance = 100; // Distance for max scale
+    const scaleXAmount =
+      Math.min(Math.abs(deltaX) / maxScaleDistance, 1) * 0.05; // Max 10% scale per axis
+    const scaleYAmount =
+      Math.min(Math.abs(deltaY) / maxScaleDistance, 1) * 0.05;
+    const scaleX = 1 + scaleXAmount;
+    const scaleY = 1 + scaleYAmount;
+
     data.stretchX = stretchX;
     data.stretchY = stretchY;
 
-    // Apply translation
-    el.style.transform = `translate(${stretchX}px, ${stretchY}px)`;
+    // Apply translation and non-uniform scale
+    el.style.transform = `translate(${stretchX}px, ${stretchY}px) scale(${scaleX}, ${scaleY})`;
   };
 
   const setLightPosition = (e) => {
@@ -216,7 +231,7 @@ export const useGlassHighlight = ({
       // Elastic spring-back animation
       el.style.transitionDuration = "300ms";
       el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-      el.style.transform = "translate(0px, 0px)";
+      el.style.transform = "translate(0px, 0px) scale(1, 1)";
 
       data.stretchX = 0;
       data.stretchY = 0;
@@ -234,7 +249,7 @@ export const useGlassHighlight = ({
       // Elastic spring-back animation
       el.style.transitionDuration = "300ms";
       el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-      el.style.transform = "translate(0px, 0px)";
+      el.style.transform = "translate(0px, 0px) scale(1, 1)";
 
       data.stretchX = 0;
       data.stretchY = 0;
@@ -251,7 +266,7 @@ export const useGlassHighlight = ({
         data.dragStartY = undefined;
         el.style.transitionDuration = "300ms";
         el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-        el.style.transform = "translate(0px, 0px)";
+        el.style.transform = "translate(0px, 0px) scale(1, 1)";
         data.stretchX = 0;
         data.stretchY = 0;
       }
