@@ -45,7 +45,11 @@ export const useGlassHighlight = ({
       }
     }
 
-    // Reset stretch state
+    // Reset stretch state and transform origin
+    const el2 = getEl();
+    if (el2) {
+      el2.style.transformOrigin = "";
+    }
     data.isDragging = false;
     data.dragStartX = undefined;
     data.dragStartY = undefined;
@@ -109,6 +113,24 @@ export const useGlassHighlight = ({
       Math.min(distanceOutsideY / maxScaleDistance, 1) * 0.1;
     const scaleX = 1 + scaleXAmount;
     const scaleY = 1 + scaleYAmount;
+
+    // Set transform origin based on where the cursor is relative to the element
+    let originX = "50%";
+    let originY = "50%";
+
+    if (x < rect.left) {
+      originX = "100%"; // Scale from right edge when pulling left
+    } else if (x > rect.right) {
+      originX = "0%"; // Scale from left edge when pulling right
+    }
+
+    if (y < rect.top) {
+      originY = "100%"; // Scale from bottom edge when pulling up
+    } else if (y > rect.bottom) {
+      originY = "0%"; // Scale from top edge when pulling down
+    }
+
+    el.style.transformOrigin = `${originX} ${originY}`;
 
     data.stretchX = stretchX;
     data.stretchY = stretchY;
