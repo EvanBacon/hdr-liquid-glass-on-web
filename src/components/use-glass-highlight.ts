@@ -23,6 +23,7 @@ export const useGlassHighlight = ({
     if (el && data.elScale) {
       data.elScale = false;
       el.style.scale = "";
+      el.style.translate = "";
 
       const onTransitionEnd = () => {
         el.style.transitionDuration = "";
@@ -43,6 +44,45 @@ export const useGlassHighlight = ({
         lightElWrap.style.opacity = 0;
       }
     }
+
+    // Reset stretch state
+    data.isDragging = false;
+    data.dragStartX = undefined;
+    data.dragStartY = undefined;
+    data.stretchX = 0;
+    data.stretchY = 0;
+  };
+
+  const updateStretch = (e) => {
+    if (!data.rect || !data.isDragging || data.dragStartX === undefined || data.dragStartY === undefined) return;
+
+    const el = getEl();
+
+    if (!el) return;
+
+    const { x, y } = e;
+
+    // Calculate delta from drag start position
+    const deltaX = x - data.dragStartX;
+    const deltaY = y - data.dragStartY;
+
+    // Apply damping to create elastic feel (max 30px stretch)
+    const maxStretch = 30;
+    const dampingFactor = 0.3;
+    const stretchX = Math.max(
+      -maxStretch,
+      Math.min(maxStretch, deltaX * dampingFactor)
+    );
+    const stretchY = Math.max(
+      -maxStretch,
+      Math.min(maxStretch, deltaY * dampingFactor)
+    );
+
+    data.stretchX = stretchX;
+    data.stretchY = stretchY;
+
+    // Apply translation
+    el.style.transform = `translate(${stretchX}px, ${stretchY}px)`;
   };
 
   const setLightPosition = (e) => {
@@ -151,22 +191,93 @@ export const useGlassHighlight = ({
   const onPointerMove = (e) => {
     if (!isEnabled()) return;
     setLightPosition(e);
+    updateStretch(e);
   };
+
+  const onPointerDown = (e) => {
+    if (!isEnabled()) return;
+    data.isDragging = true;
+    data.dragStartX = e.x;
+    data.dragStartY = e.y;
+    const el = getEl();
+    if (el) {
+      el.style.transitionDuration = "0ms";
+    }
+  };
+
+  const onPointerUp = (e) => {
+    if (!isEnabled()) return;
+    data.isDragging = false;
+    data.dragStartX = undefined;
+    data.dragStartY = undefined;
+
+    const el = getEl();
+    if (el) {
+      // Elastic spring-back animation
+      el.style.transitionDuration = "300ms";
+      el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+      el.style.transform = "translate(0px, 0px)";
+
+      data.stretchX = 0;
+      data.stretchY = 0;
+    }
+  };
+
+  const onPointerCancel = (e) => {
+    if (!isEnabled()) return;
+    data.isDragging = false;
+    data.dragStartX = undefined;
+    data.dragStartY = undefined;
+
+    const el = getEl();
+    if (el) {
+      // Elastic spring-back animation
+      el.style.transitionDuration = "300ms";
+      el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+      el.style.transform = "translate(0px, 0px)";
+
+      data.stretchX = 0;
+      data.stretchY = 0;
+    }
+  };
+
   const onPointerLeave = (e) => {
+    // Trigger bounce-back before removing highlight
+    if (data.isDragging) {
+      const el = getEl();
+      if (el) {
+        data.isDragging = false;
+        data.dragStartX = undefined;
+        data.dragStartY = undefined;
+        el.style.transitionDuration = "300ms";
+        el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+        el.style.transform = "translate(0px, 0px)";
+        data.stretchX = 0;
+        data.stretchY = 0;
+      }
+    }
     removeHoverHighlight();
   };
+
   const attachEvents = () => {
     const el = getEl();
     if (!el) return;
     el.addEventListener("pointerenter", onPointerEnter);
     el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointerup", onPointerUp);
+    el.addEventListener("pointercancel", onPointerCancel);
     el.addEventListener("pointerleave", onPointerLeave);
   };
+
   const detachEvents = () => {
     const el = getEl();
     if (!el) return;
     el.removeEventListener("pointerenter", onPointerEnter);
     el.removeEventListener("pointermove", onPointerMove);
+    el.removeEventListener("pointerdown", onPointerDown);
+    el.removeEventListener("pointerup", onPointerUp);
+    el.removeEventListener("pointercancel", onPointerCancel);
     el.removeEventListener("pointerleave", onPointerLeave);
   };
 

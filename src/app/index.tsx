@@ -16,7 +16,7 @@ export default function Page() {
             >
               <Text
                 role="heading"
-                className="text-3xl text-center native:text-5xl font-bold sm:text-4xl md:text-5xl lg:text-6xl font-rounded"
+                className="select-none text-3xl text-center native:text-5xl font-bold sm:text-4xl md:text-5xl lg:text-6xl font-rounded"
               >
                 Welcome to Project ACME
               </Text>
