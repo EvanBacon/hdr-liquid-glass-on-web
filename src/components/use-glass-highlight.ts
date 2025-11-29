@@ -209,6 +209,11 @@ export const useGlassHighlight = ({
     updateStretch(e);
   };
 
+  const onGlobalPointerMove = (e) => {
+    if (!isEnabled() || !data.isDragging) return;
+    updateStretch(e);
+  };
+
   const onPointerDown = (e) => {
     if (!isEnabled()) return;
     data.isDragging = true;
@@ -218,9 +223,13 @@ export const useGlassHighlight = ({
     if (el) {
       el.style.transitionDuration = "0ms";
     }
+    // Attach global listeners for tracking outside element bounds
+    document.addEventListener("pointermove", onGlobalPointerMove);
+    document.addEventListener("pointerup", onGlobalPointerUp);
+    document.addEventListener("pointercancel", onGlobalPointerCancel);
   };
 
-  const onPointerUp = (e) => {
+  const onGlobalPointerUp = (e) => {
     if (!isEnabled()) return;
     data.isDragging = false;
     data.dragStartX = undefined;
@@ -236,9 +245,17 @@ export const useGlassHighlight = ({
       data.stretchX = 0;
       data.stretchY = 0;
     }
+
+    // Remove global listeners
+    document.removeEventListener("pointermove", onGlobalPointerMove);
+    document.removeEventListener("pointerup", onGlobalPointerUp);
+    document.removeEventListener("pointercancel", onGlobalPointerCancel);
+
+    // Remove highlight after release
+    removeHoverHighlight();
   };
 
-  const onPointerCancel = (e) => {
+  const onGlobalPointerCancel = (e) => {
     if (!isEnabled()) return;
     data.isDragging = false;
     data.dragStartX = undefined;
@@ -254,24 +271,21 @@ export const useGlassHighlight = ({
       data.stretchX = 0;
       data.stretchY = 0;
     }
+
+    // Remove global listeners
+    document.removeEventListener("pointermove", onGlobalPointerMove);
+    document.removeEventListener("pointerup", onGlobalPointerUp);
+    document.removeEventListener("pointercancel", onGlobalPointerCancel);
+
+    // Remove highlight after cancel
+    removeHoverHighlight();
   };
 
   const onPointerLeave = (e) => {
-    // Trigger bounce-back before removing highlight
-    if (data.isDragging) {
-      const el = getEl();
-      if (el) {
-        data.isDragging = false;
-        data.dragStartX = undefined;
-        data.dragStartY = undefined;
-        el.style.transitionDuration = "300ms";
-        el.style.transitionTimingFunction = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-        el.style.transform = "translate(0px, 0px) scale(1, 1)";
-        data.stretchX = 0;
-        data.stretchY = 0;
-      }
+    // Don't remove highlight if dragging - keep tracking globally
+    if (!data.isDragging) {
+      removeHoverHighlight();
     }
-    removeHoverHighlight();
   };
 
   const attachEvents = () => {
@@ -280,8 +294,6 @@ export const useGlassHighlight = ({
     el.addEventListener("pointerenter", onPointerEnter);
     el.addEventListener("pointermove", onPointerMove);
     el.addEventListener("pointerdown", onPointerDown);
-    el.addEventListener("pointerup", onPointerUp);
-    el.addEventListener("pointercancel", onPointerCancel);
     el.addEventListener("pointerleave", onPointerLeave);
   };
 
@@ -291,9 +303,12 @@ export const useGlassHighlight = ({
     el.removeEventListener("pointerenter", onPointerEnter);
     el.removeEventListener("pointermove", onPointerMove);
     el.removeEventListener("pointerdown", onPointerDown);
-    el.removeEventListener("pointerup", onPointerUp);
-    el.removeEventListener("pointercancel", onPointerCancel);
     el.removeEventListener("pointerleave", onPointerLeave);
+
+    // Clean up any global listeners that might still be attached
+    document.removeEventListener("pointermove", onGlobalPointerMove);
+    document.removeEventListener("pointerup", onGlobalPointerUp);
+    document.removeEventListener("pointercancel", onGlobalPointerCancel);
   };
 
   return {
