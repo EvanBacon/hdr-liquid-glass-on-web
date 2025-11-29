@@ -45,6 +45,10 @@ html::after {
   @theme {
     /* https://github.com/konstaui/konsta/blob/ea24993739b60b16b53ed9f6847872adc4075b78/src/styles/glass.css#L1C1-L66C2 */
 
+    --sf-blue: color(display-p3 0 0.48 1);
+    --color-sf-blue: var(--sf-blue) /* rgba(0, 122, 255, 1) */;
+
+    --bg-sf-dark: rgba(61.2, 61.2, 66, 0.6);
     /* prettier-ignore */
     --shadow-sf-light-glass-thumb:
         inset -3px -3px 0px -3.5px rgba(255, 255, 255, 1),
