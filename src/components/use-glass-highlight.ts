@@ -296,6 +296,12 @@ export const useGlassHighlight = ({
 
   const onPointerDown = (e) => {
     if (!isEnabled()) return;
+
+    // On touch devices, pointerenter might not fire, so create highlight if it doesn't exist
+    if (!data.lightElWrap) {
+      onPointerEnter(e);
+    }
+
     data.isDragging = true;
     data.dragStartX = e.clientX;
     data.dragStartY = e.clientY;
