@@ -76,20 +76,21 @@ export const useGlassHighlight = ({
     const maskSize = 150;
     d.maskRadius = maskSize / 2;
 
-    const hdrOpacity = 0.1 * opacity;
-    // Apply mask with gradient: 90% opacity at center fading to transparent
-    backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${hdrOpacity}) 0%, transparent 70%)`;
-    // backgroundEl.style.webkitMaskImage = `radial-gradient(circle at center, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, transparent 70%)`;
+    const targetHdrOpacity = 0.1 * opacity;
+    // Start with 0 opacity in the mask gradient
+    backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${targetHdrOpacity}) 0%, transparent 70%)`;
     backgroundEl.style.maskSize = `${maskSize}px ${maskSize}px`;
     backgroundEl.style.webkitMaskSize = `${maskSize}px ${maskSize}px`;
     backgroundEl.style.maskPosition = "0px 0px";
     backgroundEl.style.webkitMaskPosition = "0px 0px";
     backgroundEl.style.maskRepeat = "no-repeat";
     backgroundEl.style.webkitMaskRepeat = "no-repeat";
+    backgroundEl.style.transition = "mask-position 0.1s ease-out";
     backgroundEl.style.opacity = `${opacity}`;
 
     d.lightEl = backgroundEl;
     d.lightElWrap = lightElWrap;
+    d.backgroundEl = backgroundEl;
     setLightPosition(e);
     lightElWrap.append(backgroundEl);
     el.append(lightElWrap);
@@ -105,6 +106,7 @@ export const useGlassHighlight = ({
         el.style.transitionTimingFunction = "ease-in-out";
       }
     }
+
     nextTick(() => {
       lightElWrap.style.opacity = 1;
     });
