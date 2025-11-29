@@ -191,6 +191,14 @@ export const useGlassHighlight = ({
     const d = data;
     const el = getEl();
 
+    // Clean up any existing highlight before creating a new one
+    if (d.lightElWrap) {
+      d.lightElWrap.remove();
+      d.lightElWrap = null;
+      d.lightEl = null;
+      d.backgroundEl = null;
+    }
+
     d.rect = el.getBoundingClientRect();
     const lightElWrap = document.createElement("span");
     lightElWrap.className = "rounded-[inherit]";

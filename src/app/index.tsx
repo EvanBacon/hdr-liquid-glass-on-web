@@ -1,14 +1,14 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-import { Link } from "@/tw";
+import { Image, Link } from "@/tw";
 import { Glass } from "@/components/glass";
 
 export default function Page() {
   return (
-    <View className="flex-1 bg-amber-200">
+    <View className="flex-1 bg-[rgba(242.25, 242.25, 247.35, 1)]">
       <View className="py-12 md:py-24 lg:py-32 xl:py-48">
-        <View className="px-4 md:px-6">
+        <View className="select-none px-4 md:px-6">
           <View className="flex flex-col items-center gap-4 text-center">
             <Glass
               isInteractive
@@ -21,9 +21,19 @@ export default function Page() {
                 Welcome to Project ACME
               </Text>
             </Glass>
+
+            <Glass
+              isInteractive
+              className="flex  gap-1 mb-12 p-3 rounded-full outline-sf-border"
+            >
+              <Image
+                source="https://simpleicons.org/icons/expo.svg"
+                className="w-6 h-6 object-contain select-none pointer-events-none"
+              />
+            </Glass>
             <Text
               role="heading"
-              className="text-3xl text-center native:text-5xl font-bold sm:text-4xl md:text-5xl lg:text-6xl font-rounded"
+              className=" text-3xl text-center native:text-5xl font-bold sm:text-4xl md:text-5xl lg:text-6xl font-rounded"
             >
               Welcome to Project ACME
             </Text>
