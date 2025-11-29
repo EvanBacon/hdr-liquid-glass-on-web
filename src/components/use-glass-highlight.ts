@@ -79,7 +79,7 @@ export const useGlassHighlight = ({
 
     // Apply damping to create elastic feel (max 30px stretch)
     const maxStretch = 40;
-    const dampingFactor = 0.1;
+    const dampingFactor = 0.2;
     const stretchX = Math.max(
       -maxStretch,
       Math.min(maxStretch, deltaX * dampingFactor)
@@ -107,10 +107,8 @@ export const useGlassHighlight = ({
 
     // Calculate scale based on distance outside bounds (smooth transition)
     const maxScaleDistance = 100; // Distance for max scale
-    const scaleXAmount =
-      Math.min(distanceOutsideX / maxScaleDistance, 1) * 0.1; // Max 10% scale per axis
-    const scaleYAmount =
-      Math.min(distanceOutsideY / maxScaleDistance, 1) * 0.1;
+    const scaleXAmount = Math.min(distanceOutsideX / maxScaleDistance, 1) * 0.1; // Max 10% scale per axis
+    const scaleYAmount = Math.min(distanceOutsideY / maxScaleDistance, 1) * 0.1;
     const scaleX = 1 + scaleXAmount;
     const scaleY = 1 + scaleYAmount;
 
@@ -140,10 +138,22 @@ export const useGlassHighlight = ({
   };
 
   const setLightPosition = (e) => {
-    if (data.lightEl && data.maskRadius) {
+    if (data.lightEl && data.maskRadius && data.rect) {
       const { x, y } = e;
-      const targetX = x - data.rect.x - data.maskRadius;
-      const targetY = y - data.rect.y - data.maskRadius;
+      const rect = data.rect;
+
+      // Calculate cursor position relative to element
+      const cursorX = x - rect.x;
+      const cursorY = y - rect.y;
+
+      // Clamp cursor position to element bounds
+      const clampedCursorX = Math.max(0, Math.min(rect.width, cursorX));
+      const clampedCursorY = Math.max(0, Math.min(rect.height, cursorY));
+
+      // Calculate mask position (center of mask at cursor position)
+      // Subtract maskRadius to position the center, not the top-left
+      let targetX = clampedCursorX - data.maskRadius;
+      let targetY = clampedCursorY - data.maskRadius;
 
       // Initialize current position if not set
       if (data.currentMaskX === undefined) {
@@ -208,7 +218,6 @@ export const useGlassHighlight = ({
     const backgroundEl = document.createElement("span");
     backgroundEl.style.position = "absolute";
     backgroundEl.style.inset = "0";
-    backgroundEl.style.backgroundColor = "#fff";
     backgroundEl.style.pointerEvents = "none";
     backgroundEl.style.transition = "background-color 150ms ease-out";
 
@@ -217,8 +226,15 @@ export const useGlassHighlight = ({
     d.maskRadius = maskSize / 2;
 
     const hoverOpacity = 0.5 * opacity;
-    // Start with hover opacity in the mask gradient
-    backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${hoverOpacity}) 0%, transparent 70%)`;
+    const dragOpacity = 0.1 * opacity;
+
+    // Check if we're currently dragging to set appropriate colors
+    const isDragging = d.isDragging === true;
+    const bgColor = isDragging ? "color(srgb 8 8 8)" : "#fff";
+    const maskOpacity = isDragging ? dragOpacity : hoverOpacity;
+
+    backgroundEl.style.backgroundColor = bgColor;
+    backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${maskOpacity}) 0%, transparent 70%)`;
     backgroundEl.style.maskSize = `${maskSize}px ${maskSize}px`;
     backgroundEl.style.webkitMaskSize = `${maskSize}px ${maskSize}px`;
     backgroundEl.style.maskPosition = "0px 0px";
@@ -263,6 +279,7 @@ export const useGlassHighlight = ({
 
   const onGlobalPointerMove = (e) => {
     if (!isEnabled() || !data.isDragging) return;
+    setLightPosition(e);
     updateStretch(e);
   };
 
