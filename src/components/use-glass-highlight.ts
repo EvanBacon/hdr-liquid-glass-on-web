@@ -201,6 +201,12 @@ export const useGlassHighlight = ({
     const d = data;
     const el = getEl();
 
+    // If we're dragging and highlight already exists, just update rect and return
+    if (d.isDragging && d.lightElWrap) {
+      d.rect = el.getBoundingClientRect();
+      return;
+    }
+
     // Clean up any existing highlight before creating a new one
     if (d.lightElWrap) {
       d.lightElWrap.remove();
