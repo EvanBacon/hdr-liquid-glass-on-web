@@ -116,5 +116,5 @@ html::after {
 
 .hdr-thing {
   /* background-color: color(from rgb(255, 255, 255) srgb 8 8 8); */
-  background-image: radial-gradient(circle at center, color(from rgb(255, 255, 255) srgb 8 8 8), transparent 50%);
+  /* background-image: radial-gradient(circle at center, color(from rgb(255, 255, 255) srgb 8 8 8), transparent 50%); */
 }

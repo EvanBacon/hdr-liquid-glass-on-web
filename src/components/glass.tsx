@@ -37,7 +37,8 @@ export const Glass = (
         elRef.current = el;
       }}
       className={cn(
-        "bg-sf-grouped-bg-2/75 shadow-sf-light-glass backdrop-blur-lg touch-none",
+        "bg-white/75 shadow-sf-light-glass touch-none",
+        // "backdrop-blur-lg",
         className
       )}
       {...rest}
