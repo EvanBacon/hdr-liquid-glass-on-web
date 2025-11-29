@@ -208,16 +208,17 @@ export const useGlassHighlight = ({
     const backgroundEl = document.createElement("span");
     backgroundEl.style.position = "absolute";
     backgroundEl.style.inset = "0";
-    backgroundEl.style.backgroundColor = "color(srgb 8 8 8)";
+    backgroundEl.style.backgroundColor = "#fff";
     backgroundEl.style.pointerEvents = "none";
+    backgroundEl.style.transition = "background-color 150ms ease-out";
 
     // Fixed-size circular mask (200px diameter)
     const maskSize = 150;
     d.maskRadius = maskSize / 2;
 
-    const targetHdrOpacity = 0.1 * opacity;
-    // Start with 0 opacity in the mask gradient
-    backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${targetHdrOpacity}) 0%, transparent 70%)`;
+    const hoverOpacity = 0.5 * opacity;
+    // Start with hover opacity in the mask gradient
+    backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${hoverOpacity}) 0%, transparent 70%)`;
     backgroundEl.style.maskSize = `${maskSize}px ${maskSize}px`;
     backgroundEl.style.webkitMaskSize = `${maskSize}px ${maskSize}px`;
     backgroundEl.style.maskPosition = "0px 0px";
@@ -225,6 +226,10 @@ export const useGlassHighlight = ({
     backgroundEl.style.maskRepeat = "no-repeat";
     backgroundEl.style.webkitMaskRepeat = "no-repeat";
     backgroundEl.style.opacity = `${opacity}`;
+
+    // Store for later updates
+    d.maskSize = maskSize;
+    d.hoverOpacity = hoverOpacity;
 
     d.lightEl = backgroundEl;
     d.lightElWrap = lightElWrap;
@@ -269,6 +274,12 @@ export const useGlassHighlight = ({
     const el = getEl();
     if (el) {
       el.style.transitionDuration = "0ms";
+    }
+    // Change glow color and opacity when dragging
+    if (data.backgroundEl && data.maskSize !== undefined) {
+      data.backgroundEl.style.backgroundColor = "color(srgb 8 8 8)";
+      const dragOpacity = 0.1 * opacity;
+      data.backgroundEl.style.maskImage = `radial-gradient(circle at center, rgba(0,0,0,${dragOpacity}) 0%, transparent 70%)`;
     }
     // Attach global listeners for tracking outside element bounds
     document.addEventListener("pointermove", onGlobalPointerMove);
