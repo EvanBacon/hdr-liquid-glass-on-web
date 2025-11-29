@@ -70,7 +70,8 @@ export const useGlassHighlight = ({
 
     if (!el) return;
 
-    const { x, y } = e;
+    const x = e.clientX;
+    const y = e.clientY;
     const rect = data.rect;
 
     // Calculate delta from drag start position
@@ -142,7 +143,8 @@ export const useGlassHighlight = ({
 
   const setLightPosition = (e) => {
     if (data.lightEl && data.maskRadius && data.rect) {
-      const { x, y } = e;
+      const x = e.clientX;
+      const y = e.clientY;
       const rect = data.rect;
 
       // Calculate cursor position relative to element
@@ -295,8 +297,8 @@ export const useGlassHighlight = ({
   const onPointerDown = (e) => {
     if (!isEnabled()) return;
     data.isDragging = true;
-    data.dragStartX = e.x;
-    data.dragStartY = e.y;
+    data.dragStartX = e.clientX;
+    data.dragStartY = e.clientY;
     const el = getEl();
     if (el) {
       el.style.transitionDuration = "150ms";

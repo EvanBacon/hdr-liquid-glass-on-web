@@ -9,9 +9,9 @@ import { Image, Link } from "@/tw";
 export default function Layout() {
   return (
     <View className="flex flex-1 bg-white">
-      <Header />
+      {/* <Header /> */}
       <Slot />
-      <Footer />
+      {/* <Footer /> */}
     </View>
   );
 }
