@@ -10,6 +10,12 @@
       "expo-router"
     ],
     "name": "hdr-glass-web",
-    "slug": "hdr-glass-web"
+    "slug": "hdr-glass-web",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "30099e66-e21e-41da-82fb-90d6f0492974"
+      }
+    }
   }
 }
